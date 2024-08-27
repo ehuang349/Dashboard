@@ -1,4 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using dashboard.server.Helpers;
+using dashboard.server.Models;
+using Dashboard.Server.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dashboard.Server.Controllers
 {
@@ -6,14 +10,47 @@ namespace Dashboard.Server.Controllers
     [Route("api")]
     public class DashboardController : ControllerBase
     {
-        
-
+        private readonly DashboardContext _context;
         private readonly ILogger<DashboardController> _logger;
 
-        public DashboardController(ILogger<DashboardController> logger)
+        public DashboardController(ILogger<DashboardController> logger, DashboardContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
+        [HttpPost]
+        [Route("generate_api_key")]
+        public async Task<IActionResult> FetchOrStoreApiKey([FromBody] string user, [FromBody] string type)
+        {
+            if (String.IsNullOrEmpty(user))
+            {
+                return BadRequest("User parameter is required");
+            }
+
+            var exists = await _context.ApiAccesses.Where(a => a.User == user && a.IsActive).FirstOrDefaultAsync();
+
+            if (exists != null)
+            {
+                return BadRequest("User already has an existing api-key");
+            }
+            else
+            {
+                var apiKey = GlobalHelpers.GenerateApiKey();
+
+                ApiAccess apiAccess = new ApiAccess
+                {
+                    CreatedAt = DateTime.Now,
+                    ApiKey = apiKey,
+                    User = user,
+                    Type = "TOKENSTRING",
+                    IsActive = true
+                };
+
+                _context.ApiAccesses.Add(apiAccess);
+                await _context.SaveChangesAsync();
+                return Ok(new { message = $"Api Access record was created!", apiKey = apiAccess.ApiKey });
+            }
+        }
     }
 }
