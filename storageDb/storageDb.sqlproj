@@ -65,5 +65,7 @@
   <ItemGroup>
     <Build Include="dbo\Tables\ApiAccess.sql" />
     <Build Include="dbo\Views\vw_ApiAccess.sql" />
+    <Build Include="dbo\Views\vw_WeatherRecords.sql" />
+    <Build Include="dbo\Tables\WeatherRecords.sql" />
   </ItemGroup>
 </Project>

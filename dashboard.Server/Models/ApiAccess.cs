@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace dashboard.server.Models
 {
-    [Table("ApiAccess")]
+    [Table("vw_ApiAccess")]
     public class ApiAccess
     {
         [Key]

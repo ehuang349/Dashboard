@@ -3,6 +3,7 @@ using dashboard.server.Helpers;
 using dashboard.server.Models;
 using Dashboard.Server.Entities;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace Dashboard.Server.Controllers
 {
@@ -21,7 +22,7 @@ namespace Dashboard.Server.Controllers
 
         [HttpPost]
         [Route("generate_api_key")]
-        public async Task<IActionResult> FetchOrStoreApiKey([FromBody] string user, [FromBody] string type)
+        public async Task<IActionResult> FetchOrStoreApiKey(string user, string type)
         {
             if (String.IsNullOrEmpty(user))
             {
@@ -51,6 +52,25 @@ namespace Dashboard.Server.Controllers
                 await _context.SaveChangesAsync();
                 return Ok(new { message = $"Api Access record was created!", apiKey = apiAccess.ApiKey });
             }
+        }
+
+        [HttpGet]
+        [Route("get_all_weather_records")]
+        public async Task<IActionResult> GetWeatherRecords()
+        {
+            return Ok(await _context.WeatherRecords.ToListAsync());
+        }
+
+        [HttpGet]
+        [Route("get_weather")]
+        public async Task<IActionResult> GetWeatherByCity(string city)
+        {
+            WeatherRecord records = await _context.WeatherRecords.Where(w => w.City == city).FirstOrDefaultAsync();
+            if (records == null)
+            {
+                return NotFound(new { message = "Weather record not found." });
+            }
+            return Ok(records);
         }
     }
 }
